@@ -9,7 +9,7 @@ export class AuthController {
 
     @Post("signln")
     async signln(@Body() body : AuthSignlnDTO){
-        return body
+        return this.authService.login(body)
     }
 
     @Post("signup")

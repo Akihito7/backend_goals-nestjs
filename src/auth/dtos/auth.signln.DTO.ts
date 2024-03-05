@@ -1,9 +1,6 @@
 import { IsEmail, IsNotEmpty, IsStrongPassword } from "class-validator";
 
 export class AuthSignlnDTO {
-
-    @IsNotEmpty()
-    name: string;
     
     @IsEmail()
     email: string;
