@@ -24,12 +24,7 @@ export class AuthService {
 
         if (!passwordMatched) throw new NotFoundException("Email e/ou senhas errados");
 
-        const token = this.jwtService.sign({}, {
-            expiresIn: "1 day",
-            issuer: "login",
-            audience: "users",
-            subject: String(user.id),
-        })
+        const token = this.generateToken("signup", String(user.id))
 
         return { user, token }
 
@@ -49,15 +44,24 @@ export class AuthService {
 
         const user = await this.prisma.user.create({ data });
 
-        const token = this.jwtService.sign({}, {
-            expiresIn: "1 day",
-            issuer: "login",
-            audience: "users",
-            subject: String(user.id),
-        })
-
+        const token = this.generateToken("signup", String(user.id))
 
 
         return { user, token }
     }
+
+    generateToken(issuer: string, userId: string) {
+
+        const audience = "users"
+        const expiresIn = "7d"
+
+        return this.jwtService.sign({}, {
+            expiresIn,
+            issuer,
+            audience,
+            subject: userId
+        })
+    }
+
+
 }
