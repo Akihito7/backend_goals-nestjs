@@ -1,9 +1,10 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { AuthSignupDTO } from "./dtos/auth.signup.DTO";
 import { PrismaService } from "nestjs-prisma";
 import { hash, compare } from "bcrypt"
 import { JwtService } from "@nestjs/jwt";
 import { AuthSignlnDTO } from "./dtos/auth.signln.DTO";
+import { AuthTokenDTO } from "./dtos/auth.token.DTO";
 
 @Injectable()
 export class AuthService {
@@ -24,13 +25,12 @@ export class AuthService {
 
         if (!passwordMatched) throw new NotFoundException("Email e/ou senhas errados");
 
-        const token = this.generateToken("signup", String(user.id))
+        const token = this.generateToken("auth", String(user.id))
 
         return { user, token }
 
 
     }
-
 
     async register(data: AuthSignupDTO) {
 
@@ -44,7 +44,7 @@ export class AuthService {
 
         const user = await this.prisma.user.create({ data });
 
-        const token = this.generateToken("signup", String(user.id))
+        const token = this.generateToken("auth", String(user.id))
 
 
         return { user, token }
@@ -61,6 +61,23 @@ export class AuthService {
             audience,
             subject: userId
         })
+    }
+
+    checkToken(token : AuthTokenDTO) {
+        const verifyToken = String(token).split(" ")[1]
+
+        try {
+            const isValidToken = this.jwtService.verify(verifyToken, {
+                issuer: "auth",
+                audience: "users"
+            })
+
+            return isValidToken
+
+        } catch (error) {
+            throw new BadRequestException("Token inválido")
+        }
+
     }
 
 
